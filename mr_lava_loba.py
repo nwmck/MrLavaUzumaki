@@ -411,7 +411,7 @@ except ImportError:
 crop_flag = ("west_to_vent" in locals()) and ("east_to_vent" in locals()) \
     and ("south_to_vent" in locals()) and ("north_to_vent" in locals())
 
-print('west_to_vent', west_to_vent)
+# print('west_to_vent', west_to_vent)
 print('x_vent', x_vent)
 print('Crop flag = ', crop_flag)
 
