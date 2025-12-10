@@ -14,6 +14,7 @@ from os.path import exists
 import gc
 import pandas as pd
 
+from input_data import avg_lobe_thickness
 from input_data import run_name
 from input_data import source
 from input_data import x_vent
