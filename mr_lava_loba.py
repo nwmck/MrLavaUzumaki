@@ -47,7 +47,15 @@ from input_data_advanced import force_max_length
 if force_max_length:
 
     from input_data_advanced import max_length
+folder_name = "Run Files"
 
+def ensure_run_files_folder():
+
+    # Check if the folder exists in the current working directory
+    if not os.path.isdir(folder_name):
+        os.makedirs(folder_name)
+
+ensure_run_files_folder()
 
 def interp2Dgrids(xin, yin, Zin, Xout, Yout):
     """
@@ -272,6 +280,7 @@ condition = True
 
 base_name = run_name
 
+# TODO update while loop to look in the run files folder
 while condition:
 
     run_name = base_name + '_{0:03}'.format(i)
@@ -473,8 +482,9 @@ if crop_flag:
     header += "NODATA_value " + str(nd) + "\n"
 
     output_DEM = run_name + '_DEM.asc'
+    DEM_output_path = os.path.join(folder_name, output_DEM)
 
-    np.savetxt(output_DEM,
+    np.savetxt(DEM_output_path,
                np.flipud(arr),
                header=header,
                fmt='%1.5f',
@@ -1801,8 +1811,9 @@ if (saveraster_flag == 1):
     header += "NODATA_value 0\n"
 
     output_full = run_name + '_thickness_full.asc'
+    full_output_path = os.path.join(folder_name, output_full)
 
-    np.savetxt(output_full,
+    np.savetxt(full_output_path,
                np.flipud(Zflow),
                header=header,
                fmt='%1.5f',
@@ -1951,7 +1962,9 @@ if (saveraster_flag == 1):
                               ' m')
 
                     output_thickness = run_name + '_avg_thick.txt'
-                    with open(output_thickness, 'a') as the_file:
+                    thickness_output_path = os.path.join(folder_name, output_thickness)
+
+                    with open(thickness_output_path, 'a') as the_file:
 
                         if (i_thr == 0):
                             the_file.write('Average lobe thickness = ' +
@@ -1981,8 +1994,9 @@ if (saveraster_flag == 1):
                     output_masked = run_name + '_thickness_masked' + '_' + \
                         str(masking_threshold[i_thr]).replace(
                             '.', '_') + '.asc'
+                    masked_output_path = os.path.join(folder_name, output_masked)
 
-                    np.savetxt(output_masked,
+                    np.savetxt(masked_output_path,
                                np.flipud((1 - masked_Zflow.mask) * Zflow),
                                header=header,
                                fmt='%1.5f',
@@ -2076,8 +2090,9 @@ if (saveraster_flag == 1):
     if (hazard_flag):
 
         output_haz = run_name + '_hazard_full.asc'
+        haz_output_path = os.path.join(folder_name, output_haz)
 
-        np.savetxt(output_haz,
+        np.savetxt(haz_output_path,
                    np.flipud(Zhazard),
                    header=header,
                    fmt='%1.5f',
@@ -2169,8 +2184,9 @@ if (saveraster_flag == 1):
 
                 output_haz_masked = run_name + '_hazard_masked' + '_' + \
                     str(masking_threshold[i_thr]).replace('.', '_') + '.asc'
+                haz_masked_output_path = os.path.join(folder_name, output_haz_masked)
 
-                np.savetxt(output_haz_masked,
+                np.savetxt(haz_masked_output_path,
                            np.flipud((1 - masked_Zflow.mask) * Zhazard),
                            header=header,
                            fmt='%1.5f',
@@ -2215,8 +2231,9 @@ if (saveraster_flag == 1):
             Zflow = Zflow + Zflow_old
 
         output_full = run_name + '_thickness_cumulative.asc'
+        full_output_path = os.path.join(folder_name, output_full)
 
-        np.savetxt(output_full,
+        np.savetxt(full_output_path,
                    np.flipud(Zflow),
                    header=header,
                    fmt='%1.5f',
