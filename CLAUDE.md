@@ -8,11 +8,19 @@ MrLavaLoba is a stochastic lava flow simulation model. It generates probabilisti
 
 ## Running the Model
 
+### Single Run
 ```bash
 python mr_lava_loba.py
 ```
 
-The model reads parameters from `input_data.py` (basic parameters) and `input_data_advanced.py` (advanced parameters). No command-line arguments are used.
+The model reads parameters from `input_data.py` (basic parameters) and `input_data_advanced.py` (advanced parameters).
+
+### Batch Runs
+```bash
+python run_batch.py
+```
+
+Processes multiple simulations defined in `Run Report.csv`. Each row with an empty "Run #" and at least one input parameter will be processed. Results are written back to the CSV.
 
 ## Dependencies
 
@@ -62,6 +70,15 @@ Saved to `Run Files/` directory with auto-incrementing run numbers:
 - `{run_name}_{NNN}_thickness_masked_{threshold}.asc` - Masked by volume/area threshold
 - `{run_name}_{NNN}_avg_thick.txt` - Average thickness value
 - `{run_name}_{NNN}_inp.bak` - Backup of input parameters
+
+### Batch Runner (run_batch.py)
+
+Orchestrates multiple simulation runs via `Run Report.csv`:
+- Reads CSV and identifies rows to process (empty "Run #" + at least one input parameter)
+- Temporarily modifies `input_data.py` with row-specific overrides
+- Runs `mr_lava_loba.py` as subprocess
+- Parses results from `*_avg_thick.txt` and writes to CSV output columns
+- Fills empty input cells with defaults that were used
 
 ### Utility Scripts
 
