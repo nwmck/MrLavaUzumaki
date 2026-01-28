@@ -141,13 +141,14 @@ def find_latest_run_name():
     """Find the most recently created run name from backup files"""
     import glob
 
-    # Look for the newest backup file
-    backup_files = glob.glob('*_inp.bak')
+    # Look for the newest backup file in the Input Parameter History folder
+    backup_files = glob.glob(os.path.join('Input Parameter History', '*_inp.bak'))
     if backup_files:
         # Sort by modification time, get newest
         newest = max(backup_files, key=os.path.getmtime)
-        # Extract run name (remove _inp.bak suffix)
-        return newest.replace('_inp.bak', '')
+        # Extract run name (remove path and _inp.bak suffix)
+        filename = os.path.basename(newest)
+        return filename.replace('_inp.bak', '')
 
     return None
 

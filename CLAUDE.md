@@ -65,11 +65,14 @@ The core algorithm:
 
 ### Output Files
 
-Saved to `Run Files/` directory with auto-incrementing run numbers:
-- `{run_name}_{NNN}_thickness_full.asc` - Complete thickness raster
-- `{run_name}_{NNN}_thickness_masked_{threshold}.asc` - Masked by volume/area threshold
-- `{run_name}_{NNN}_avg_thick.txt` - Average thickness value
-- `{run_name}_{NNN}_inp.bak` - Backup of input parameters
+Simulation outputs saved to `Run Files/` directory:
+- `{run_name}_thickness_full.asc` - Complete thickness raster
+- `{run_name}_thickness_masked_{threshold}.asc` - Masked by volume/area threshold
+- `{run_name}_avg_thick.txt` - Summary metrics
+
+Input parameter backups saved to `Input Parameter History/` directory:
+- `{run_name}_inp.bak` - Backup of input_data.py
+- `{run_name}_advanced_inp.bak` - Backup of input_data_advanced.py
 
 ### Batch Runner (run_batch.py)
 

@@ -48,6 +48,7 @@ if force_max_length:
 
     from input_data_advanced import max_length
 folder_name = "Run Files"
+backup_folder_name = "Input Parameter History"
 
 def ensure_run_files_folder():
 
@@ -55,7 +56,14 @@ def ensure_run_files_folder():
     if not os.path.isdir(folder_name):
         os.makedirs(folder_name)
 
+def ensure_backup_folder():
+
+    # Check if the backup folder exists in the current working directory
+    if not os.path.isdir(backup_folder_name):
+        os.makedirs(backup_folder_name)
+
 ensure_run_files_folder()
+ensure_backup_folder()
 
 def interp2Dgrids(xin, yin, Zin, Xout, Yout):
     """
@@ -280,13 +288,13 @@ condition = True
 
 base_name = run_name
 
-# TODO update while loop to look in the run files folder
+# Check for existing runs in the backup folder
 while condition:
 
     run_name = base_name + '_{0:03}'.format(i)
 
-    backup_advanced_file = run_name + '_advanced_inp.bak'
-    backup_file = run_name + '_inp.bak'
+    backup_advanced_file = os.path.join(backup_folder_name, run_name + '_advanced_inp.bak')
+    backup_file = os.path.join(backup_folder_name, run_name + '_inp.bak')
 
     condition = os.path.isfile(backup_file)
 
@@ -862,14 +870,14 @@ for flow in range(0, n_flows):
         # DEFINE THE NUMBER OF LOBES OF THE FLOW (RANDOM VALUE BETWEEN
         # MIN AND MAX)
         n_lobes = int(
-            np.ceil(np.random.uniform(min_n_lobes, max_n_lobes, size=1)))
+            np.ceil(np.random.uniform(min_n_lobes, max_n_lobes)))
 
     else:
 
         x_beta = (1.0 * flow) / (n_flows - 1)
         n_lobes = int(
             np.rint(min_n_lobes + 0.5 * (max_n_lobes - min_n_lobes) *
-                    beta.pdf(x_beta, a_beta, b_beta)))
+                    beta.pdf(x_beta, a_beta, b_beta)).item())
 
     n_lobes_tot = n_lobes_tot + n_lobes
 
@@ -1095,7 +1103,7 @@ for flow in range(0, n_flows):
 
             else:
 
-                rand = np.random.uniform(0, 1, size=1)
+                rand = np.random.uniform(0, 1)
                 rand_angle_new = 360.0 * np.abs(rand - 0.5)
 
             angle[i] = max_slope_angle + rand_angle_new
@@ -1218,7 +1226,7 @@ for flow in range(0, n_flows):
 
         if (lobe_exponent > 0):
 
-            idx0 = np.random.uniform(0, 1, size=1)
+            idx0 = np.random.uniform(0, 1)
 
             idx1 = idx0**lobe_exponent
 

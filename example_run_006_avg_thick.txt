@@ -1,8 +1,0 @@
-Average lobe thickness = 0.1 m
-Total volume = 2099228355.6617718 m3
-Total area = 13935073.308982573 m2
-Average thickness full = 150.64351002076216 m
-Masking threshold = 0.999
-Masked volume = 2097127587.9712017 m3
-Masked area = 9960230.067174964 m2
-Average thickness mask = 210.5501151908646 m

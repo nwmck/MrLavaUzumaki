@@ -64,9 +64,12 @@ The CSV is saved after each run, so progress is preserved if the batch is interr
 
 ## Output Files
 
-Results are saved to the `Run Files/` directory:
+Simulation outputs are saved to the **`Run Files/`** directory:
 - `{run_name}_thickness_full.asc` - Complete thickness raster
 - `{run_name}_thickness_masked_{threshold}.asc` - Masked thickness raster
-- `{run_name}_avg_thick.txt` - Summary metrics
-- `{run_name}_inp.bak` - Backup of input parameters used
+- `{run_name}_avg_thick.txt` - Summary metrics (8 output metrics including total volume, area, average thickness)
+
+Input parameter backups are saved to the **`Input Parameter History/`** directory:
+- `{run_name}_inp.bak` - Backup of `input_data.py` parameters used for this run
+- `{run_name}_advanced_inp.bak` - Backup of `input_data_advanced.py` parameters used for this run
 
