@@ -1,4 +1,4 @@
-from input_data_advanced import n_check_loop
+import argparse
 import numpy as np
 from linecache import getline
 from scipy.stats import beta
@@ -14,24 +14,72 @@ from os.path import exists
 import gc
 import pandas as pd
 
-from input_data import avg_lobe_thickness
-from input_data import run_name
-from input_data import source
-from input_data import x_vent
-from input_data import y_vent
-from input_data import hazard_flag
-from input_data import masking_threshold
-from input_data import n_flows
-from input_data import min_n_lobes
-from input_data import max_n_lobes
-from input_data import thickening_parameter
-from input_data import lobe_area
-from input_data import inertial_exponent
-from input_data import lobe_exponent
-from input_data import max_slope_prob
-from input_data import thickness_ratio
-from input_data import fixed_dimension_flag
-from input_data import vent_flag
+# =============================================================================
+# CLI ARGUMENT PARSING
+# When run from run_batch.py, parameters are passed via command line.
+# When run directly, parameters are read from input_data.py (fallback).
+# =============================================================================
+
+def parse_arguments():
+    """Parse command line arguments for batch processing."""
+    parser = argparse.ArgumentParser(
+        description='MrLavaLoba - Stochastic lava flow simulation',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    # Parameters that can be overridden via CLI (matching CSV columns)
+    parser.add_argument('--run-name', type=str, default=None,
+                        help='Name for this simulation run')
+    parser.add_argument('--source', type=str, default=None,
+                        help='Path to DEM file')
+    parser.add_argument('--masking-threshold', type=float, default=None,
+                        help='Masking threshold (0-1)')
+    parser.add_argument('--n-flows', type=int, default=None,
+                        help='Number of flows')
+    parser.add_argument('--min-n-lobes', type=int, default=None,
+                        help='Minimum number of lobes per flow')
+    parser.add_argument('--max-n-lobes', type=int, default=None,
+                        help='Maximum number of lobes per flow')
+    parser.add_argument('--volume-flag', type=int, default=None,
+                        help='Volume flag (0 or 1)')
+    parser.add_argument('--total-volume', type=float, default=None,
+                        help='Total volume in m^3')
+    parser.add_argument('--fixed-dimension-flag', type=int, default=None,
+                        help='Fixed dimension flag (1=area, 2=thickness)')
+    parser.add_argument('--lobe-area', type=float, default=None,
+                        help='Area of each lobe in m^2')
+    parser.add_argument('--avg-lobe-thickness', type=float, default=None,
+                        help='Average lobe thickness in m')
+    parser.add_argument('--thickening-parameter', type=float, default=None,
+                        help='Thickening parameter (0-1)')
+    parser.add_argument('--lobe-exponent', type=float, default=None,
+                        help='Lobe exponent for parent selection')
+    parser.add_argument('--max-slope-prob', type=float, default=None,
+                        help='Maximum slope probability (0-1)')
+    parser.add_argument('--inertial-exponent', type=float, default=None,
+                        help='Inertial exponent')
+
+    return parser.parse_args()
+
+# Parse CLI arguments
+cli_args = parse_arguments()
+
+# =============================================================================
+# PARAMETER LOADING - CLI args take precedence over input_data.py
+# =============================================================================
+
+def get_param(cli_value, import_func, param_name):
+    """Get parameter from CLI if provided, otherwise import from file."""
+    if cli_value is not None:
+        return cli_value
+    try:
+        return import_func()
+    except ImportError:
+        print(f'{param_name} not specified in input')
+        return None
+
+# Import from input_data_advanced (these are not CLI-configurable)
+from input_data_advanced import n_check_loop
 from input_data_advanced import npoints
 from input_data_advanced import n_init
 from input_data_advanced import dist_fact
@@ -42,11 +90,109 @@ from input_data_advanced import max_aspect_ratio
 from input_data_advanced import saveraster_flag
 from input_data_advanced import aspect_ratio_coeff
 from input_data_advanced import start_from_dist_flag
-
 from input_data_advanced import force_max_length
 if force_max_length:
-
     from input_data_advanced import max_length
+
+# Import non-CLI parameters from input_data
+from input_data import x_vent
+from input_data import y_vent
+from input_data import hazard_flag
+from input_data import thickness_ratio
+from input_data import vent_flag
+
+# CLI-configurable parameters (with fallback to input_data.py)
+if cli_args.run_name is not None:
+    run_name = cli_args.run_name
+else:
+    from input_data import run_name
+
+if cli_args.source is not None:
+    source = cli_args.source
+else:
+    from input_data import source
+
+if cli_args.masking_threshold is not None:
+    masking_threshold = cli_args.masking_threshold
+else:
+    from input_data import masking_threshold
+
+if cli_args.n_flows is not None:
+    n_flows = cli_args.n_flows
+else:
+    from input_data import n_flows
+
+if cli_args.min_n_lobes is not None:
+    min_n_lobes = cli_args.min_n_lobes
+else:
+    from input_data import min_n_lobes
+
+if cli_args.max_n_lobes is not None:
+    max_n_lobes = cli_args.max_n_lobes
+else:
+    from input_data import max_n_lobes
+
+# If min_n_lobes was set via CLI but max_n_lobes wasn't,
+# maintain the relationship from input_data.py (max = min)
+if cli_args.min_n_lobes is not None and cli_args.max_n_lobes is None:
+    max_n_lobes = min_n_lobes
+
+if cli_args.fixed_dimension_flag is not None:
+    fixed_dimension_flag = cli_args.fixed_dimension_flag
+else:
+    from input_data import fixed_dimension_flag
+
+if cli_args.lobe_area is not None:
+    lobe_area = cli_args.lobe_area
+else:
+    from input_data import lobe_area
+
+if cli_args.avg_lobe_thickness is not None:
+    avg_lobe_thickness = cli_args.avg_lobe_thickness
+else:
+    from input_data import avg_lobe_thickness
+
+if cli_args.thickening_parameter is not None:
+    thickening_parameter = cli_args.thickening_parameter
+else:
+    from input_data import thickening_parameter
+
+if cli_args.lobe_exponent is not None:
+    lobe_exponent = cli_args.lobe_exponent
+else:
+    from input_data import lobe_exponent
+
+if cli_args.max_slope_prob is not None:
+    max_slope_prob = cli_args.max_slope_prob
+else:
+    from input_data import max_slope_prob
+
+if cli_args.inertial_exponent is not None:
+    inertial_exponent = cli_args.inertial_exponent
+else:
+    from input_data import inertial_exponent
+
+# volume_flag and total_volume - special handling
+if cli_args.volume_flag is not None:
+    volume_flag = cli_args.volume_flag
+else:
+    try:
+        from input_data import volume_flag
+    except ImportError:
+        print('volume_flag not specified in input')
+        sys.exit()
+
+if cli_args.total_volume is not None:
+    total_volume = cli_args.total_volume
+else:
+    if volume_flag == 1:
+        try:
+            from input_data import total_volume
+        except ImportError:
+            print('total_volume needed when volume_flag=1')
+            sys.exit()
+    else:
+        total_volume = None  # Not needed when volume_flag != 1
 folder_name = "Run Files"
 backup_folder_name = "Input Parameter History"
 
@@ -281,24 +427,25 @@ if (n_vents > 1):
 
 # print(cum_fiss_length)
 
-# search if another run with the same base name already exists
-i = 0
+# Auto-increment run name ONLY if not provided via CLI
+# When run from batch runner with --run-name, use that name exactly
+if cli_args.run_name is None:
+    # search if another run with the same base name already exists
+    i = 0
+    condition = True
+    base_name = run_name
 
-condition = True
-
-base_name = run_name
-
-# Check for existing runs in the backup folder
-while condition:
-
-    run_name = base_name + '_{0:03}'.format(i)
-
+    # Check for existing runs in the backup folder
+    while condition:
+        run_name = base_name + '_{0:03}'.format(i)
+        backup_advanced_file = os.path.join(backup_folder_name, run_name + '_advanced_inp.bak')
+        backup_file = os.path.join(backup_folder_name, run_name + '_inp.bak')
+        condition = os.path.isfile(backup_file)
+        i = i + 1
+else:
+    # Run name provided via CLI - use it exactly as given
     backup_advanced_file = os.path.join(backup_folder_name, run_name + '_advanced_inp.bak')
     backup_file = os.path.join(backup_folder_name, run_name + '_inp.bak')
-
-    condition = os.path.isfile(backup_file)
-
-    i = i + 1
 
 # create a backup file of the input parameters
 shutil.copy2('input_data_advanced.py', backup_advanced_file)
@@ -338,25 +485,9 @@ descendents = np.zeros(alloc_n_lobes, dtype=int)
 parent = np.zeros(alloc_n_lobes, dtype=int)
 alfa_inertial = np.zeros(alloc_n_lobes)
 
-try:
-
-    from input_data import volume_flag
-
-except ImportError:
-
-    print('volume_flag non specified in input')
-    sys.exit()
+# volume_flag and total_volume are already set at the top (from CLI or input_data.py)
 
 if (volume_flag == 1):
-
-    try:
-
-        from input_data import total_volume
-
-    except ImportError:
-
-        print('total_volume needed')
-        sys.exit()
 
     if (fixed_dimension_flag == 1):
 

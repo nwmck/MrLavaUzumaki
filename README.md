@@ -9,6 +9,7 @@ Stochastic model for lava flows.
 - scipy
 - matplotlib (https://matplotlib.org/)
 - pandas
+- psutil (for RAM monitoring in batch mode)
 
 Bundled dependencies (no installation required):
 - `rtnorm.py` - Truncated Gaussian distribution sampling by C. Lassner (https://github.com/classner/py-rtnorm)
@@ -24,13 +25,30 @@ python mr_lava_loba.py
 
 This runs a single simulation using parameters from `input_data.py` and `input_data_advanced.py`. See `input_data.py` for parameter definitions.
 
-### Batch Runs
+### Batch Runs (Parallel Execution)
 
 To run multiple simulations with different parameter combinations:
 
 ```bash
-python run_batch.py
+python run_batch.py                    # Use settings from input_data.py
+python run_batch.py --workers 4        # Override to use 4 workers
+python run_batch.py --ignore-ram-check # Skip RAM availability check
 ```
+
+#### Parallel Execution Settings
+
+Configure in `input_data.py`:
+
+```python
+worker_mode = 'fixed'        # 'fixed' or 'auto'
+n_workers = 2                # Number of workers (when mode='fixed')
+cores_to_reserve = 2         # Cores to keep free (when mode='auto')
+ignore_ram_check = False     # Skip RAM checks
+```
+
+- **fixed mode**: Uses exactly `n_workers` parallel processes
+- **auto mode**: Uses `(total_cores - cores_to_reserve)` processes
+- **RAM check**: Warns if estimated memory usage exceeds 80% of available RAM
 
 #### How Batch Runs Work
 
