@@ -2,7 +2,7 @@
 # name of the run (used to save the parameters and the output)
 run_name = 'example_run'
 # File name of ASCII digital elevation model
-source = "nigel_paleo_ch_demfilled.asc"
+source = "/Users/nigel/Desktop/MrLavaUzumaki/nigel_paleo_ch_demfilled.asc"
 
 # Parameters to crop the DEM file. This reduces the computational
 # time when the DEM is large and the area covered by the flow
